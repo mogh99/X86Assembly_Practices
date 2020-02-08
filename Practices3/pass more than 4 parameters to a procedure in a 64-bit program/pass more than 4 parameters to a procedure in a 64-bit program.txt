@@ -1,0 +1,78 @@
+includelib libcmt.lib
+includelib libvcruntime.lib
+includelib libucrt.lib
+includelib legacy_stdio_definitions.lib  
+
+extern printf_s: proc, scanf_s:proc
+
+.data
+   str1 byte 41 dup(0)
+   str2 byte 41 dup(0)
+   str3 byte 41 dup(0)
+   str4 byte 41 dup(0)
+   str5 byte 41 dup(0)
+   str6 byte 41 dup(0)
+
+
+   promptMsg byte "Enter six words: ",0
+   inputFormatString byte "%s%s%s%s%s%s", 0
+   outputFormatString byte "%s %s %s %s %s %s", 13, 10, 0
+
+.code
+main proc
+	push        rbp  
+	sub         rsp, 96;     4 register parameters + 8 stack parameters ==> 8 * 4 + 8 * 8 ====> there are 8 stack parameters because scanf_s have 13 parameters 4 of them are passed by registers and 9 are passed by the stack
+ 
+    ; printf_s("Enter 6 words: ");
+	lea         rcx, promptMsg 
+	call        printf_s
+    ; scanf_s("%s%s%s%s%s%s", str1, 40, str2, 40, str3, 40, str4, 40, str5, 40, str6, 40); 40 is the string buffer size
+	
+	mov         dword ptr [rsp + 96], 40 
+	lea         rax, str6  
+	mov         [rsp + 88], rax 
+	
+	mov         dword ptr [rsp + 80], 40  
+	lea         rax, str5  
+	mov         [rsp + 72], rax  
+
+	mov         dword ptr [rsp + 64], 40  
+	lea         rax, str4  
+	mov         [rsp + 56], rax 
+	
+	mov         dword ptr [rsp + 48], 40  
+	lea         rax, str3  
+	mov         [rsp + 40], rax 
+	
+	mov         dword ptr [rsp + 32], 40  
+	lea         r9,  str2 
+	
+	mov         r8, 40  
+	lea         rdx, str1 
+	
+	lea         rcx, inputFormatString
+	call        scanf_s 
+	
+     ; printf_s("%s %s %s %s %s %s", str1, str2, str3, str4, str5, str6); printf_s doesn't required string buffer size
+	
+	lea         rax, str6  
+	mov         [rsp + 48], rax 
+	
+	lea         rax, str5  
+	mov         [rsp + 40], rax 
+	
+	lea         rax, str4  
+	mov         [rsp + 32], rax 
+	
+	lea         r9, str3  
+	lea         r8, str2  
+	lea         rdx, str1  
+	lea         rcx, outputFormatString  
+	call        printf_s 
+
+	add         rsp, 96 
+	pop         rbp  
+	xor         eax,eax  
+	ret  
+main endp
+end
